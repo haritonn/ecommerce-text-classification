@@ -1,7 +1,7 @@
 import gensim
-from nltk.corpus import wordnet
 import nltk
 import numpy as np
+from nltk.corpus import wordnet
 
 # column_names = ['class', 'text']
 # text_data = pd.read_csv("data/ecommerceDataset.csv", name=column_names, heading=None)
@@ -14,7 +14,7 @@ def label_enc(text_data):
         "Books": 2,
         "Clothing & Accessories": 3,
     }
-    text_data['class'] = text_data['class'].map(labels_mapping)
+    text_data["class"] = text_data["class"].map(labels_mapping)
     return text_data
 
 
@@ -33,7 +33,7 @@ def nltk_pos_to_wordnet_pos(nltk_pos):
 
 
 def preprocess_text(text_data):
-    all_texts = text_data["text"]
+    all_texts = text_data["text"].fillna("").astype(str)
     stopwords = nltk.corpus.stopwords.words("english")
     lemmatizer = nltk.stem.WordNetLemmatizer()
     formatted_texts = []
@@ -58,14 +58,21 @@ def get_embeddings(text_data):
     texts = text_data["tokenized"].tolist()
     model = gensim.models.Word2Vec(texts, vector_size=150, window=5, min_count=2, sg=0)
 
+    embedding_dim = model.wv.vector_size
+
     embeddings = []
     for tokens in texts:
-        word_vectors = [model.wv[word] for word in tokens if word in model.wv]
+        word_vectors = []
+        for word in tokens:
+            if word in model.wv:
+                word_vectors.append(model.wv[word])
+
         if word_vectors:
-            sentence_emb = np.mean(word_vectors, axis=0)
+            sentence_emb = np.array(word_vectors, dtype=np.float32)
         else:
-            sentence_emb = np.zeros(model.wv.vector_size)
+            sentence_emb = np.zeros((1, embedding_dim), dtype=np.float32)
+
         embeddings.append(sentence_emb)
 
-    text_data['embeddings'] = embeddings
-    return text_data, len(embeddings)
+    text_data["embeddings"] = embeddings
+    return text_data, embedding_dim

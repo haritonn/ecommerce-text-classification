@@ -1,14 +1,18 @@
 import torch
 from torch.utils.data import Dataset
+
 import preprocessing
+
 
 class ecomDataset(Dataset):
     def __init__(self, data_table):
         processed_labels = preprocessing.label_enc(data_table)
-        self.texts = data_table['text']
-        self.labels = processed_labels['class']
-        embeddings, _ = preprocessing.get_embeddings(preprocessing.preprocess_text(processed_labels))
-        self.embeddings = embeddings['embeddings']
+        self.texts = data_table["text"]
+        self.labels = processed_labels["class"]
+        embeddings, _ = preprocessing.get_embeddings(
+            preprocessing.preprocess_text(processed_labels)
+        )
+        self.embeddings = embeddings["embeddings"]
 
     def __len__(self):
         return len(self.texts)
