@@ -68,4 +68,4 @@ def get_embeddings(text_data):
         embeddings.append(sentence_emb)
 
     text_data['embeddings'] = embeddings
-    return text_data 
+    return text_data, len(embeddings)

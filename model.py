@@ -3,11 +3,11 @@ import torch.nn as nn
 
 
 class RNNModel(nn.Module):
-    def __init__(self, input_dim, embed_dim, hidden_dim, layer_dim, output_dim=4):
+    def __init__(self, input_dim, hidden_dim, layer_dim, output_dim=4):
         super().__init__()
         self.layer_dim = layer_dim
         self.hidden_dim = hidden_dim
-        self.gru = nn.GRU(embed_dim, hidden_dim, num_layers=layer_dim, batch_first=True)
+        self.gru = nn.GRU(input_dim, hidden_dim, num_layers=layer_dim, batch_first=True)
         self.fc = nn.Linear(hidden_dim, output_dim)
 
     def forward(self, x, h0=None):

@@ -3,11 +3,11 @@ from torch.utils.data import Dataset
 import preprocessing
 
 class ecomDataset(Dataset):
-    def __init__(self, data_table, vocab):
+    def __init__(self, data_table):
         processed_labels = preprocessing.label_enc(data_table)
         self.texts = data_table['text']
         self.labels = processed_labels['class']
-        embeddings = preprocessing.get_embeddings(preprocessing.preprocess_text(processed_labels))
+        embeddings, _ = preprocessing.get_embeddings(preprocessing.preprocess_text(processed_labels))
         self.embeddings = embeddings['embeddings']
 
     def __len__(self):
