@@ -5,6 +5,9 @@ import preprocessing
 
 
 class ecomDataset(Dataset):
+    """
+    Simple class for pt Dataset, using functions from preprocessing.
+    """
     def __init__(self, data_table):
         processed_labels = preprocessing.label_enc(data_table)
         self.texts = data_table["text"]

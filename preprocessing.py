@@ -4,11 +4,15 @@ import numpy as np
 import yaml
 from nltk.corpus import wordnet
 
+# Config reading
 with open("config.yaml", "r") as f:
     config = yaml.safe_load(f)
 
 
 def label_enc(text_data):
+    """
+    Label encoder for target variable (class)
+    """
     labels_mapping = {
         "Household": 0,
         "Electronics": 1,
@@ -19,8 +23,10 @@ def label_enc(text_data):
     return text_data
 
 
-# nltk pos -> worned pos tags mapping
 def nltk_pos_to_wordnet_pos(nltk_pos):
+    """
+    Mapping from NLTK pos tag to WordNet pos tag
+    """
     if nltk_pos.startswith("J"):
         return wordnet.ADJ
     elif nltk_pos.startswith("V"):
@@ -34,6 +40,9 @@ def nltk_pos_to_wordnet_pos(nltk_pos):
 
 
 def preprocess_text(text_data):
+    """
+    Adding "tokenized" column to DataFrame
+    """
     all_texts = text_data["text"].fillna("").astype(str)
     stopwords = nltk.corpus.stopwords.words("english")
     lemmatizer = nltk.stem.WordNetLemmatizer()
@@ -56,6 +65,9 @@ def preprocess_text(text_data):
 
 
 def get_embeddings(text_data):
+    """
+    Adding "embeddings" column to DataFrame
+    """
     texts = text_data["tokenized"].tolist()
     model = gensim.models.Word2Vec(
         texts, vector_size=config["model"]["input_dim"], window=5, min_count=2, sg=0

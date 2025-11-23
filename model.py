@@ -3,6 +3,11 @@ import torch.nn as nn
 
 
 class RNNModel(nn.Module):
+    """
+    Simple recurrent NN with GRU layers.
+    Since we already making embeddings via Gensim, we shouldn't apply
+    nn.Embedding layer here.
+    """
     def __init__(self, input_dim, hidden_dim, layer_dim, output_dim=4):
         super().__init__()
         self.layer_dim = layer_dim
