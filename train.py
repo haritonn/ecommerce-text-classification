@@ -7,11 +7,16 @@ import tqdm
 from matplotlib import pyplot as plt
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import DataLoader
+import yaml
 
 import preprocessing
 from dataset import ecomDataset
 from model import RNNModel
 
+
+
+with open("config.yaml", "r") as f:
+    config = yaml.safe_load(f)
 
 def collate_fn(batch):
     sequences, labels = zip(*batch)
@@ -25,27 +30,27 @@ column_names = ["class", "text"]
 text_data = pd.read_csv("data/ecommerceDataset.csv", names=column_names, header=None)
 dataset = ecomDataset(text_data)
 
-train_size = int(len(text_data) * 0.8)
+train_size = int(len(text_data) * config['data']['train_split'])
 test_size = len(text_data) - train_size
 
 train_data, test_data = torch.utils.data.random_split(dataset, [train_size, test_size])
 
-train_loader = DataLoader(train_data, batch_size=8, shuffle=True, collate_fn=collate_fn)
-test_loader = DataLoader(test_data, batch_size=8, shuffle=False, collate_fn=collate_fn)
+train_loader = DataLoader(train_data, batch_size=config['training']['batch_size'], shuffle=True, collate_fn=collate_fn)
+# test_loader = DataLoader(test_data, batch_size=8, shuffle=False, collate_fn=collate_fn)
 
 _, input_dim = preprocessing.get_embeddings(preprocessing.preprocess_text(text_data))
 
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-model = RNNModel(input_dim, hidden_dim=120, layer_dim=5)
+model = RNNModel(input_dim, hidden_dim=config['model']['hidden_dim'], layer_dim=config['model']['layer_dim'])
 model = model.to(device)
 
 criterion = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=3e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=config['training']['learning_rate'])
 
 # todo: train script
 total_loss = []
-for epoch in range(20):
+for epoch in range(config['training']['num_epochs']):
     pbar_prefix = f"Epoch {epoch + 1} | 10"
     current_epoch_loss = float(0)
     loop = tqdm.tqdm(train_loader, desc=pbar_prefix, leave=False)
@@ -65,7 +70,7 @@ for epoch in range(20):
     epoch_loss = current_epoch_loss / len(train_loader)
     total_loss.append(epoch_loss)
 
-os.makedirs("train_results/", exist_ok=True)
+os.makedirs(config['paths']['result_dir'], exist_ok=True)
 
 epochs = range(1, len(total_loss) + 1)
 fig = plt.figure(figsize=(6, 8))
@@ -74,5 +79,5 @@ plt.title("Train process")
 plt.xlabel("Epochs")
 plt.ylabel("Loss")
 
-plt.savefig("train_results/result.png")
+plt.savefig(os.path.join(config['paths']['result_dir'], "train_results.png"))
 plt.close(fig)

@@ -1,10 +1,11 @@
 import gensim
 import nltk
 import numpy as np
+import yaml
 from nltk.corpus import wordnet
 
-# column_names = ['class', 'text']
-# text_data = pd.read_csv("data/ecommerceDataset.csv", name=column_names, heading=None)
+with open("config.yaml", "r") as f:
+    config = yaml.safe_load(f)
 
 
 def label_enc(text_data):
@@ -56,7 +57,9 @@ def preprocess_text(text_data):
 
 def get_embeddings(text_data):
     texts = text_data["tokenized"].tolist()
-    model = gensim.models.Word2Vec(texts, vector_size=150, window=5, min_count=2, sg=0)
+    model = gensim.models.Word2Vec(
+        texts, vector_size=config["model"]["input_dim"], window=5, min_count=2, sg=0
+    )
 
     embedding_dim = model.wv.vector_size
 
